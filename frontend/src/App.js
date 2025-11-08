@@ -12,6 +12,8 @@ import Editor from "@/pages/Editor";
 import MyMemes from "@/pages/MyMemes";
 import Templates from "@/pages/Templates";
 import AIGenerator from "@/pages/AIGenerator";
+import GifCreator from "@/pages/GifCreator";
+import Profile from "@/pages/Profile";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {

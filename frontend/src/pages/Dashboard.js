@@ -83,9 +83,20 @@ const Dashboard = () => {
               My Memes
             </Button>
 
+            <NotificationsPanel />
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/profile')}
+              data-testid="profile-button"
+            >
+              <User className="h-5 w-5" />
+            </Button>
+
             <div className="flex items-center space-x-2">
               <div className="text-right">
-                <p className="text-sm font-medium" data-testid="user-username">{user?.username}</p>
+                <p className="text-sm font-medium cursor-pointer hover:text-green-400" onClick={() => navigate('/profile')} data-testid="user-username">{user?.username}</p>
                 <p className="text-xs text-muted-foreground">{user?.email}</p>
               </div>
             </div>

@@ -8,6 +8,10 @@ import { Toaster } from "@/components/ui/sonner";
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import Dashboard from "@/pages/Dashboard";
+import Editor from "@/pages/Editor";
+import MyMemes from "@/pages/MyMemes";
+import Templates from "@/pages/Templates";
+import AIGenerator from "@/pages/AIGenerator";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {

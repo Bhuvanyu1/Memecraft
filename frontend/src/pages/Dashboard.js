@@ -117,7 +117,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card 
             className="cursor-pointer hover:border-green-500 transition-colors bg-slate-900/50 border-slate-800"
             onClick={() => navigate('/editor/new')}
@@ -129,8 +129,8 @@ const Dashboard = () => {
                   <Plus className="h-6 w-6 text-green-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Create from Scratch</h3>
-                  <p className="text-sm text-slate-400">Start with a blank canvas</p>
+                  <h3 className="font-semibold text-white">Create Meme</h3>
+                  <p className="text-sm text-slate-400">Start with canvas</p>
                 </div>
               </div>
             </CardContent>
@@ -147,8 +147,8 @@ const Dashboard = () => {
                   <Sparkles className="h-6 w-6 text-blue-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">AI Meme Generator</h3>
-                  <p className="text-sm text-slate-400">Let AI create for you</p>
+                  <h3 className="font-semibold text-white">AI Generator</h3>
+                  <p className="text-sm text-slate-400">AI creates for you</p>
                 </div>
               </div>
             </CardContent>
@@ -165,8 +165,28 @@ const Dashboard = () => {
                   <TrendingUp className="h-6 w-6 text-purple-500" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Browse Templates</h3>
+                  <h3 className="font-semibold text-white">Templates</h3>
                   <p className="text-sm text-slate-400">Use popular formats</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card 
+            className="cursor-pointer hover:border-orange-500 transition-colors bg-slate-900/50 border-slate-800"
+            onClick={() => navigate('/gif-creator')}
+            data-testid="quick-action-gif"
+          >
+            <CardContent className="pt-6">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 rounded-full bg-orange-500/10">
+                  <svg className="h-6 w-6 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white">GIF Creator</h3>
+                  <p className="text-sm text-slate-400">Animated memes</p>
                 </div>
               </div>
             </CardContent>

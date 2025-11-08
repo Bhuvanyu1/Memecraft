@@ -1,8 +1,8 @@
-import * as fabric from 'fabric';
+import { Canvas, IText, FabricImage } from 'fabric';
 
 export class MemeCanvasEditor {
   constructor(canvasElement, options = {}) {
-    this.canvas = new fabric.Canvas(canvasElement, {
+    this.canvas = new Canvas(canvasElement, {
       width: options.width || 1200,
       height: options.height || 675,
       backgroundColor: options.backgroundColor || '#ffffff',
@@ -21,7 +21,7 @@ export class MemeCanvasEditor {
 
   // Text Operations
   addText(text = 'Edit Me', options = {}) {
-    const textObject = new fabric.IText(text, {
+    const textObject = new IText(text, {
       left: 100,
       top: 100,
       fontFamily: options.fontFamily || 'Impact',

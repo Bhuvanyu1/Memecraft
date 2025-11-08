@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, TrendingUp, Sparkles, Plus } from 'lucide-react';
+import { Loader2, TrendingUp, Sparkles, Plus, User } from 'lucide-react';
+import NotificationsPanel from '@/components/NotificationsPanel';
 
 const Dashboard = () => {
   const { user } = useAuth();

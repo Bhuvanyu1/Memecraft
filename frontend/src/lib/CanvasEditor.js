@@ -50,31 +50,32 @@ export class MemeCanvasEditor {
   // Image Operations
   async addImage(imageUrl) {
     return new Promise((resolve, reject) => {
-      fabric.Image.fromURL(
+      FabricImage.fromURL(
         imageUrl,
-        (img) => {
-          if (!img) {
-            reject(new Error('Failed to load image'));
-            return;
-          }
-
-          const maxWidth = this.canvas.width * 0.8;
-          const maxHeight = this.canvas.height * 0.8;
-          const scale = Math.min(maxWidth / img.width, maxHeight / img.height);
-
-          img.scale(scale);
-          img.set({
-            left: (this.canvas.width - img.width * scale) / 2,
-            top: (this.canvas.height - img.height * scale) / 2,
-          });
-
-          this.canvas.add(img);
-          this.canvas.setActiveObject(img);
-          this.canvas.renderAll();
-          resolve(img);
-        },
         { crossOrigin: 'anonymous' }
-      );
+      ).then((img) => {
+        if (!img) {
+          reject(new Error('Failed to load image'));
+          return;
+        }
+
+        const maxWidth = this.canvas.width * 0.8;
+        const maxHeight = this.canvas.height * 0.8;
+        const scale = Math.min(maxWidth / img.width, maxHeight / img.height);
+
+        img.scale(scale);
+        img.set({
+          left: (this.canvas.width - img.width * scale) / 2,
+          top: (this.canvas.height - img.height * scale) / 2,
+        });
+
+        this.canvas.add(img);
+        this.canvas.setActiveObject(img);
+        this.canvas.renderAll();
+        resolve(img);
+      }).catch((error) => {
+        reject(error);
+      });
     });
   }
 

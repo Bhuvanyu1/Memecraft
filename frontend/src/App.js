@@ -85,6 +85,42 @@ function App() {
               }
             />
 
+            <Route
+              path="/editor/:id"
+              element={
+                <ProtectedRoute>
+                  <Editor />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/memes"
+              element={
+                <ProtectedRoute>
+                  <MyMemes />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/templates"
+              element={
+                <ProtectedRoute>
+                  <Templates />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/ai-generate"
+              element={
+                <ProtectedRoute>
+                  <AIGenerator />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Redirect root to dashboard if authenticated, otherwise to login */}
             <Route
               path="/"

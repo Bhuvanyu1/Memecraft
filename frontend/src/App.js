@@ -123,6 +123,24 @@ function App() {
               }
             />
 
+            <Route
+              path="/gif-creator"
+              element={
+                <ProtectedRoute>
+                  <GifCreator />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+
             {/* Redirect root to dashboard if authenticated, otherwise to login */}
             <Route
               path="/"

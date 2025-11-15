@@ -209,6 +209,30 @@ class TeamMemberResponse(BaseModel):
     username: Optional[str] = None
     email: Optional[str] = None
 
+
+
+class AnalyticsCreate(BaseModel):
+    meme_id: str
+    platform: Platform
+    url: str
+    engagement_data: Dict[str, Any] = {}
+
+class UserAnalyticsSummary(BaseModel):
+    total_memes: int
+    total_views: int
+    total_likes: int
+    total_shares: int
+    storage_used: int
+    daily_stats: Dict[str, Dict[str, int]]
+
+class TeamAnalyticsSummary(BaseModel):
+    total_memes: int
+    total_members: int
+    total_views: int
+    total_likes: int
+    total_shares: int
+    top_memes: List[Dict[str, Any]]
+
 class TeamInvite(BaseModel):
     email: str
     role: TeamRole = TeamRole.EDITOR

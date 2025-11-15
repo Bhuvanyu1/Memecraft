@@ -44,6 +44,14 @@ export const aiAPI = {
   suggestCaptions: (data) => api.post('/ai/suggest-captions', data),
   generateMeme: (params) => api.post('/ai/generate-meme', null, { params }),
   predictViral: (data) => api.post('/ai/predict-viral', data),
+  faceSwap: (data) => api.post('/ai/face-swap', data),
+  removeBackground: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/ai/remove-background', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  },
 };
 
 export const uploadAPI = {

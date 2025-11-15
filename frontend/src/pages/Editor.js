@@ -179,16 +179,46 @@ const Editor = () => {
     toast.success('Meme exported!');
   };
 
+  // Get all canvas objects for layers panel
+  const [canvasObjects, setCanvasObjects] = useState([]);
+
+  useEffect(() => {
+    if (editor?.canvas) {
+      const updateLayers = () => {
+        setCanvasObjects([...editor.canvas.getObjects()]);
+      };
+      
+      editor.canvas.on('object:added', updateLayers);
+      editor.canvas.on('object:removed', updateLayers);
+      editor.canvas.on('object:modified', updateLayers);
+      
+      return () => {
+        editor.canvas.off('object:added', updateLayers);
+        editor.canvas.off('object:removed', updateLayers);
+        editor.canvas.off('object:modified', updateLayers);
+      };
+    }
+  }, [editor]);
+
+  const selectLayer = (obj) => {
+    if (editor?.canvas) {
+      editor.canvas.setActiveObject(obj);
+      editor.canvas.renderAll();
+      setActiveObject(obj);
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-slate-950" data-testid="editor-page">
+    <div className="h-screen flex flex-col bg-bg-darker" data-testid="editor-page">
       {/* Top Bar */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+      <header className="border-b border-slate-800 bg-bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/dashboard')}
+              className="hover:bg-bg-hover"
               data-testid="back-button"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -198,7 +228,7 @@ const Editor = () => {
             <Input
               value={memeTitle}
               onChange={(e) => setMemeTitle(e.target.value)}
-              className="w-64"
+              className="w-64 bg-bg-darker border-slate-700 text-text-primary"
               placeholder="Meme title"
               data-testid="meme-title-input"
             />
@@ -210,6 +240,7 @@ const Editor = () => {
               size="sm"
               onClick={() => editor?.undo()}
               disabled={!editor?.canUndo()}
+              className="hover:bg-bg-hover border-slate-700"
               data-testid="undo-button"
             >
               <Undo className="h-4 w-4" />
@@ -220,6 +251,7 @@ const Editor = () => {
               size="sm"
               onClick={() => editor?.redo()}
               disabled={!editor?.canRedo()}
+              className="hover:bg-bg-hover border-slate-700"
               data-testid="redo-button"
             >
               <Redo className="h-4 w-4" />
@@ -231,6 +263,7 @@ const Editor = () => {
               variant="outline"
               size="sm"
               onClick={handleExport}
+              className="hover:bg-bg-hover border-slate-700"
               data-testid="export-button"
             >
               <Download className="h-4 w-4 mr-2" />
@@ -241,6 +274,7 @@ const Editor = () => {
               size="sm"
               onClick={handleSave}
               disabled={saving}
+              className="bg-primary-green text-gray-900 hover:opacity-90"
               data-testid="save-button"
             >
               <Save className="h-4 w-4 mr-2" />
@@ -250,18 +284,18 @@ const Editor = () => {
         </div>
       </header>
 
-      {/* Main Editor */}
+      {/* Main Editor - Three Column Layout */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Tools Sidebar */}
-        <aside className="w-64 border-r border-slate-800 bg-slate-900/50 p-4 overflow-y-auto" data-testid="tools-sidebar">
+        {/* Left Sidebar - Tools */}
+        <aside className="w-64 border-r border-slate-800 bg-bg-card/50 p-4 overflow-y-auto" data-testid="tools-sidebar">
           <div className="space-y-6">
             {/* Add Tools */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-3">Add Elements</h3>
+              <h3 className="text-sm font-semibold text-text-primary mb-3">Add Elements</h3>
               <div className="space-y-2">
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start hover:bg-bg-hover hover:border-primary-green border-slate-700 text-text-primary"
                   onClick={handleAddText}
                   data-testid="add-text-button"
                 >
@@ -272,7 +306,7 @@ const Editor = () => {
                 <label className="w-full">
                   <Button
                     variant="outline"
-                    className="w-full justify-start"
+                    className="w-full justify-start hover:bg-bg-hover hover:border-primary-blue border-slate-700 text-text-primary"
                     asChild
                     data-testid="add-image-button"
                   >
@@ -291,22 +325,22 @@ const Editor = () => {
               </div>
             </div>
 
-            <Separator />
+            <Separator className="bg-slate-700" />
 
             {/* Text Controls */}
             {activeObject?.type === 'i-text' && (
               <div>
-                <h3 className="text-sm font-semibold text-white mb-3">Text Style</h3>
+                <h3 className="text-sm font-semibold text-text-primary mb-3">Text Style</h3>
                 <div className="space-y-4">
                   <div>
-                    <Label className="text-xs">Font Family</Label>
+                    <Label className="text-xs text-text-secondary">Font Family</Label>
                     <select
                       value={fontFamily}
                       onChange={(e) => {
                         setFontFamily(e.target.value);
                         handleUpdateText();
                       }}
-                      className="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-2 py-1 text-sm text-white"
+                      className="w-full mt-1 bg-bg-darker border border-slate-700 rounded px-2 py-1 text-sm text-text-primary"
                       data-testid="font-family-select"
                     >
                       <option value="Impact">Impact</option>
@@ -317,7 +351,7 @@ const Editor = () => {
                   </div>
 
                   <div>
-                    <Label className="text-xs">Font Size: {fontSize}</Label>
+                    <Label className="text-xs text-text-secondary">Font Size: {fontSize}</Label>
                     <Slider
                       value={[fontSize]}
                       onValueChange={([val]) => {
@@ -333,7 +367,7 @@ const Editor = () => {
                   </div>
 
                   <div>
-                    <Label className="text-xs">Text Color</Label>
+                    <Label className="text-xs text-text-secondary">Text Color</Label>
                     <input
                       type="color"
                       value={textColor}
@@ -347,7 +381,7 @@ const Editor = () => {
                   </div>
 
                   <div>
-                    <Label className="text-xs">Stroke Color</Label>
+                    <Label className="text-xs text-text-secondary">Stroke Color</Label>
                     <input
                       type="color"
                       value={strokeColor}
@@ -363,15 +397,15 @@ const Editor = () => {
               </div>
             )}
 
-            <Separator />
+            <Separator className="bg-slate-700" />
 
             {/* Actions */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-3">Actions</h3>
+              <h3 className="text-sm font-semibold text-text-primary mb-3">Actions</h3>
               <div className="space-y-2">
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start hover:bg-bg-hover border-slate-700 text-text-primary"
                   onClick={() => editor?.bringToFront()}
                   disabled={!activeObject}
                   data-testid="bring-front-button"
@@ -382,7 +416,7 @@ const Editor = () => {
 
                 <Button
                   variant="outline"
-                  className="w-full justify-start"
+                  className="w-full justify-start hover:bg-bg-hover border-slate-700 text-text-primary"
                   onClick={() => editor?.sendToBack()}
                   disabled={!activeObject}
                   data-testid="send-back-button"
@@ -392,8 +426,8 @@ const Editor = () => {
                 </Button>
 
                 <Button
-                  variant="destructive"
-                  className="w-full justify-start"
+                  variant="outline"
+                  className="w-full justify-start hover:bg-accent-error hover:border-accent-error border-slate-700 text-accent-error"
                   onClick={() => editor?.deleteActiveLayer()}
                   disabled={!activeObject}
                   data-testid="delete-layer-button"
@@ -406,12 +440,61 @@ const Editor = () => {
           </div>
         </aside>
 
-        {/* Canvas Area */}
-        <div className="flex-1 flex items-center justify-center bg-slate-900 p-8" data-testid="canvas-container">
+        {/* Center - Canvas Area */}
+        <div className="flex-1 flex items-center justify-center bg-bg-dark p-8" data-testid="canvas-container">
           <div className="bg-white shadow-2xl rounded-lg overflow-hidden">
             <canvas ref={canvasRef} data-testid="meme-canvas" />
           </div>
         </div>
+
+        {/* Right Sidebar - Layers */}
+        <aside className="w-64 border-l border-slate-800 bg-bg-card/50 p-4 overflow-y-auto" data-testid="layers-sidebar">
+          <div className="space-y-4">
+            <div>
+              <h3 className="text-sm font-semibold text-text-primary mb-3 flex items-center">
+                <Layers className="h-4 w-4 mr-2 text-primary-purple" />
+                Layers
+              </h3>
+              
+              {canvasObjects.length === 0 ? (
+                <p className="text-xs text-text-muted text-center py-8">
+                  No layers yet.<br />Add text or images to get started.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {canvasObjects.map((obj, index) => (
+                    <div
+                      key={index}
+                      onClick={() => selectLayer(obj)}
+                      className={`p-3 rounded-lg cursor-pointer transition-all duration-200 border ${
+                        activeObject === obj
+                          ? 'bg-bg-hover border-primary-purple'
+                          : 'bg-bg-darker border-slate-700 hover:border-slate-600 hover:bg-bg-hover'
+                      }`}
+                      data-testid={`layer-item-${index}`}
+                    >
+                      <div className="flex items-center space-x-2">
+                        {obj.type === 'i-text' ? (
+                          <Type className="h-4 w-4 text-primary-green" />
+                        ) : (
+                          <ImageIcon className="h-4 w-4 text-primary-blue" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-text-primary truncate">
+                            {obj.type === 'i-text' ? obj.text || 'Text Layer' : 'Image Layer'}
+                          </p>
+                          <p className="text-xs text-text-muted">
+                            {obj.type === 'i-text' ? 'Text' : 'Image'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </aside>
       </div>
     </div>
   );

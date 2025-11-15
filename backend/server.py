@@ -432,7 +432,7 @@ async def predict_viral_endpoint(
         viral_score = await ai_service.predict_viral_score(meme)
         return {"viral_score": viral_score, "meme_id": request.meme_id}
     except Exception as e:
-
+        raise HTTPException(status_code=500, detail=str(e))
 
 @api_router.post("/ai/face-swap", tags=["AI"])
 async def face_swap_endpoint(

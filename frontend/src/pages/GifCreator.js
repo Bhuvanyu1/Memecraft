@@ -173,7 +173,7 @@ const GifCreator = () => {
       gif.on('finished', (blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
-        link.download = `${gifTitle.replace(/\\s+/g, '_')}.gif`;
+        link.download = `${gifTitle.replace(/\s+/g, '_')}.gif`;
         link.href = url;
         link.click();
         
@@ -190,15 +190,16 @@ const GifCreator = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-slate-950" data-testid="gif-creator-page">
+    <div className="h-screen flex flex-col bg-bg-darker" data-testid="gif-creator-page">
       {/* Top Bar */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+      <header className="border-b border-slate-800 bg-bg-card/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/dashboard')}
+              className="hover:bg-bg-hover"
               data-testid="back-button"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -208,7 +209,7 @@ const GifCreator = () => {
             <Input
               value={gifTitle}
               onChange={(e) => setGifTitle(e.target.value)}
-              className="w-64"
+              className="w-64 bg-bg-darker border-slate-700 text-text-primary"
               placeholder="GIF title"
               data-testid="gif-title-input"
             />
@@ -220,6 +221,7 @@ const GifCreator = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleStop}
+                className="hover:bg-bg-hover border-slate-700"
                 data-testid="stop-button"
               >
                 <Pause className="h-4 w-4 mr-2" />
@@ -231,6 +233,7 @@ const GifCreator = () => {
                 size="sm"
                 onClick={handlePlay}
                 disabled={frames.length === 0}
+                className="hover:bg-bg-hover hover:border-primary-purple border-slate-700"
                 data-testid="play-button"
               >
                 <Play className="h-4 w-4 mr-2" />
@@ -242,6 +245,7 @@ const GifCreator = () => {
               size="sm"
               onClick={handleExportGIF}
               disabled={exporting || frames.length === 0}
+              className="bg-primary-green text-gray-900 hover:opacity-90"
               data-testid="export-gif-button"
             >
               {exporting ? (
@@ -263,19 +267,19 @@ const GifCreator = () => {
       {/* Main Editor */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Canvas Area */}
-        <div className="flex-1 flex items-center justify-center bg-slate-900 p-8" data-testid="canvas-container">
+        <div className="flex-1 flex items-center justify-center bg-bg-dark p-8" data-testid="canvas-container">
           <div className="bg-white shadow-2xl rounded-lg overflow-hidden">
             <canvas ref={canvasRef} data-testid="gif-canvas" />
           </div>
         </div>
 
         {/* Timeline */}
-        <div className="border-t border-slate-800 bg-slate-900/50 p-4" data-testid="timeline-container">
+        <div className="border-t border-slate-800 bg-bg-card/50 p-4" data-testid="timeline-container">
           <div className="container mx-auto">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-4">
-                <h3 className="text-white font-semibold">Timeline</h3>
-                <span className="text-sm text-slate-400">
+                <h3 className="text-text-primary font-semibold">Timeline</h3>
+                <span className="text-sm text-text-secondary">
                   Frame {currentFrameIndex + 1} of {frames.length}
                 </span>
               </div>
@@ -283,6 +287,7 @@ const GifCreator = () => {
               <Button
                 onClick={handleAddFrame}
                 size="sm"
+                className="bg-primary-blue text-white hover:opacity-90"
                 data-testid="add-frame-button"
               >
                 <Plus className="h-4 w-4 mr-2" />
@@ -295,16 +300,16 @@ const GifCreator = () => {
               {frames.map((frame, index) => (
                 <Card
                   key={frame.id}
-                  className={`flex-shrink-0 cursor-pointer transition-all ${
+                  className={`flex-shrink-0 cursor-pointer transition-all rounded-xl ${
                     index === currentFrameIndex
-                      ? 'border-green-500 border-2'
-                      : 'border-slate-700'
+                      ? 'border-primary-green border-2 bg-bg-card'
+                      : 'border-slate-700 bg-bg-darker hover:border-slate-600'
                   }`}
                   onClick={() => loadFrame(index)}
                   data-testid={`frame-${index}`}
                 >
                   <CardContent className="p-2">
-                    <div className="w-32 h-24 bg-slate-800 rounded overflow-hidden mb-2">
+                    <div className="w-32 h-24 bg-bg-dark rounded overflow-hidden mb-2">
                       <img
                         src={frame.thumbnail}
                         alt={`Frame ${index + 1}`}
@@ -313,12 +318,12 @@ const GifCreator = () => {
                     </div>
 
                     <div className="space-y-2">
-                      <div className="text-xs text-white text-center">
+                      <div className="text-xs text-text-primary text-center">
                         Frame {index + 1}
                       </div>
 
                       <div className="space-y-1">
-                        <Label className="text-xs text-slate-400">
+                        <Label className="text-xs text-text-secondary">
                           Duration: {frame.duration}ms
                         </Label>
                         <Slider
@@ -340,7 +345,7 @@ const GifCreator = () => {
                             e.stopPropagation();
                             handleDuplicateFrame(index);
                           }}
-                          className="flex-1 h-7 text-xs"
+                          className="flex-1 h-7 text-xs hover:bg-bg-hover"
                           data-testid={`duplicate-frame-${index}`}
                         >
                           <Copy className="h-3 w-3" />
@@ -352,7 +357,7 @@ const GifCreator = () => {
                             e.stopPropagation();
                             handleDeleteFrame(index);
                           }}
-                          className="flex-1 h-7 text-xs text-red-500"
+                          className="flex-1 h-7 text-xs text-accent-error hover:bg-accent-error/10"
                           disabled={frames.length <= 1}
                           data-testid={`delete-frame-${index}`}
                         >

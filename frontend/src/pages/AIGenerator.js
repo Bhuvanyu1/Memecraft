@@ -69,15 +69,16 @@ const AIGenerator = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950" data-testid="ai-generator-page">
+    <div className="min-h-screen bg-bg-darker" data-testid="ai-generator-page">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-slate-800 bg-bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center space-x-4">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => navigate('/dashboard')}
+              className="hover:bg-bg-hover"
               data-testid="back-button"
             >
               <ArrowLeft className="h-4 w-4 mr-2" />
@@ -85,10 +86,10 @@ const AIGenerator = () => {
             </Button>
 
             <div>
-              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-green to-primary-blue">
                 AI Meme Generator
               </h1>
-              <p className="text-sm text-slate-400">Let AI create viral memes for you</p>
+              <p className="text-sm text-text-secondary">Let AI create viral memes for you</p>
             </div>
           </div>
         </div>
@@ -97,12 +98,12 @@ const AIGenerator = () => {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <Tabs defaultValue="meme" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="meme" data-testid="tab-meme">
+          <TabsList className="grid w-full grid-cols-2 bg-bg-card border-slate-700">
+            <TabsTrigger value="meme" className="data-[state=active]:bg-primary-green data-[state=active]:text-gray-900" data-testid="tab-meme">
               <Sparkles className="h-4 w-4 mr-2" />
               Complete Meme
             </TabsTrigger>
-            <TabsTrigger value="image" data-testid="tab-image">
+            <TabsTrigger value="image" className="data-[state=active]:bg-primary-purple data-[state=active]:text-white" data-testid="tab-image">
               <ImageIcon className="h-4 w-4 mr-2" />
               Image Only
             </TabsTrigger>
@@ -110,32 +111,33 @@ const AIGenerator = () => {
 
           {/* Complete Meme Generator */}
           <TabsContent value="meme" className="space-y-6">
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card className="bg-bg-card border-slate-800 rounded-xl">
               <CardHeader>
-                <CardTitle>Generate Complete Meme</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-text-primary">Generate Complete Meme</CardTitle>
+                <CardDescription className="text-text-secondary">
                   Enter a topic and let AI create the perfect meme with text and image
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="memeTopic">Meme Topic</Label>
+                  <Label htmlFor="memeTopic" className="text-text-secondary">Meme Topic</Label>
                   <Input
                     id="memeTopic"
                     placeholder="e.g., Monday mornings, Working from home, Coffee addiction"
                     value={memeTopic}
                     onChange={(e) => setMemeTopic(e.target.value)}
+                    className="bg-bg-darker border-slate-700 text-text-primary"
                     data-testid="meme-topic-input"
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="humorStyle">Humor Style</Label>
+                  <Label htmlFor="humorStyle" className="text-text-secondary">Humor Style</Label>
                   <select
                     id="humorStyle"
                     value={humorStyle}
                     onChange={(e) => setHumorStyle(e.target.value)}
-                    className="w-full mt-1 bg-slate-800 border border-slate-700 rounded-md px-3 py-2 text-white"
+                    className="w-full mt-1 bg-bg-darker border border-slate-700 rounded-md px-3 py-2 text-text-primary"
                     data-testid="humor-style-select"
                   >
                     <option value="sarcastic">Sarcastic</option>
@@ -149,7 +151,7 @@ const AIGenerator = () => {
                 <Button
                   onClick={handleGenerateMeme}
                   disabled={generatingMeme}
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-primary-green to-primary-blue hover:opacity-90"
                   data-testid="generate-meme-button"
                 >
                   {generatingMeme ? (
@@ -167,15 +169,15 @@ const AIGenerator = () => {
 
                 {generatedMeme && (
                   <div className="mt-6 space-y-4" data-testid="generated-meme-result">
-                    <div className="border border-slate-700 rounded-lg p-4 bg-slate-800">
-                      <h3 className="font-semibold text-white mb-2">{generatedMeme.title}</h3>
+                    <div className="border border-slate-700 rounded-lg p-4 bg-bg-darker">
+                      <h3 className="font-semibold text-text-primary mb-2">{generatedMeme.title}</h3>
                       {generatedMeme.top_text && (
-                        <p className="text-sm text-slate-300 mb-1">
+                        <p className="text-sm text-text-secondary mb-1">
                           <strong>Top Text:</strong> {generatedMeme.top_text}
                         </p>
                       )}
                       {generatedMeme.bottom_text && (
-                        <p className="text-sm text-slate-300 mb-3">
+                        <p className="text-sm text-text-secondary mb-3">
                           <strong>Bottom Text:</strong> {generatedMeme.bottom_text}
                         </p>
                       )}
@@ -193,7 +195,7 @@ const AIGenerator = () => {
                     {generatedMeme.image_url && (
                       <Button
                         onClick={() => handleUseInEditor(generatedMeme.image_url)}
-                        className="w-full"
+                        className="w-full bg-primary-purple hover:opacity-90"
                         data-testid="use-in-editor-button"
                       >
                         <Wand2 className="h-4 w-4 mr-2" />
@@ -208,25 +210,26 @@ const AIGenerator = () => {
 
           {/* Image Generator */}
           <TabsContent value="image" className="space-y-6">
-            <Card className="bg-slate-900/50 border-slate-800">
+            <Card className="bg-bg-card border-slate-800 rounded-xl">
               <CardHeader>
-                <CardTitle>Generate Image</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-text-primary">Generate Image</CardTitle>
+                <CardDescription className="text-text-secondary">
                   Describe the image you want and AI will create it
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="imagePrompt">Image Description</Label>
+                  <Label htmlFor="imagePrompt" className="text-text-secondary">Image Description</Label>
                   <Textarea
                     id="imagePrompt"
                     placeholder="e.g., A cat wearing sunglasses sitting at a computer desk, digital art"
                     value={imagePrompt}
                     onChange={(e) => setImagePrompt(e.target.value)}
                     rows={4}
+                    className="bg-bg-darker border-slate-700 text-text-primary"
                     data-testid="image-prompt-input"
                   />
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs text-text-muted mt-2">
                     Be specific! Include style, mood, and details for best results.
                   </p>
                 </div>
@@ -234,7 +237,7 @@ const AIGenerator = () => {
                 <Button
                   onClick={handleGenerateImage}
                   disabled={generatingImage}
-                  className="w-full"
+                  className="w-full bg-gradient-to-r from-primary-purple to-primary-pink hover:opacity-90"
                   data-testid="generate-image-button"
                 >
                   {generatingImage ? (
@@ -262,7 +265,7 @@ const AIGenerator = () => {
 
                     <Button
                       onClick={() => handleUseInEditor(generatedImage)}
-                      className="w-full"
+                      className="w-full bg-primary-blue hover:opacity-90"
                       data-testid="use-image-in-editor-button"
                     >
                       <Wand2 className="h-4 w-4 mr-2" />
@@ -276,13 +279,13 @@ const AIGenerator = () => {
         </Tabs>
 
         {/* Info Section */}
-        <Card className="mt-6 bg-slate-900/30 border-slate-800">
+        <Card className="mt-6 bg-bg-card/30 border-slate-800 rounded-xl">
           <CardContent className="pt-6">
             <div className="flex items-start space-x-3">
-              <Sparkles className="h-5 w-5 text-green-500 flex-shrink-0 mt-0.5" />
+              <Sparkles className="h-5 w-5 text-primary-green flex-shrink-0 mt-0.5" />
               <div>
-                <h4 className="font-semibold text-white mb-2">Powered by Advanced AI</h4>
-                <p className="text-sm text-slate-400">
+                <h4 className="font-semibold text-text-primary mb-2">Powered by Advanced AI</h4>
+                <p className="text-sm text-text-secondary">
                   We use state-of-the-art AI models including GPT-4 and DALL-E 3 to generate 
                   creative, high-quality memes. Each generation is unique and tailored to your input.
                 </p>

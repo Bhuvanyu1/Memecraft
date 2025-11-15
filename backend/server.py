@@ -647,6 +647,238 @@ async def shutdown_event():
     logger.info("Application shutdown complete")
 
 # ============================================================================
+
+# ============================================================================
+# TEAM MANAGEMENT ROUTES
+# ============================================================================
+
+@api_router.post("/teams", response_model=TeamResponse, tags=["Teams"])
+async def create_team_endpoint(
+    team_data: TeamCreate,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Create a new team"""
+    team_dict = {
+        "id": str(uuid.uuid4()),
+        "name": team_data.name,
+        "owner_id": current_user.id,
+        "plan_type": PlanType.TEAM.value,
+        "storage_limit": 5 * 1024 * 1024 * 1024  # 5GB for team
+    }
+    
+    team = await create_team(team_dict)
+    
+    # Add owner as team member
+    member_dict = {
+        "id": str(uuid.uuid4()),
+        "team_id": team["id"],
+        "user_id": current_user.id,
+        "role": TeamRole.OWNER.value,
+        "joined_at": datetime.utcnow().isoformat()
+    }
+    await add_team_member(member_dict)
+    
+    # Get member count
+    members = await get_team_members(team["id"])
+    team["member_count"] = len(members)
+    
+    return team
+
+@api_router.get("/teams", response_model=List[TeamResponse], tags=["Teams"])
+async def list_teams(
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get all teams user is member of"""
+    teams = await get_user_teams(current_user.id)
+    
+    # Add member count to each team
+    for team in teams:
+        members = await get_team_members(team["id"])
+        team["member_count"] = len(members)
+    
+    return teams
+
+@api_router.get("/teams/{team_id}", response_model=TeamResponse, tags=["Teams"])
+async def get_team_endpoint(
+    team_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get team details"""
+    # Check if user is member
+    member = await get_team_member(team_id, current_user.id)
+    if not member:
+        raise HTTPException(status_code=403, detail="Not a team member")
+    
+    team = await get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    # Add member count
+    members = await get_team_members(team_id)
+    team["member_count"] = len(members)
+    
+    return team
+
+@api_router.put("/teams/{team_id}", response_model=TeamResponse, tags=["Teams"])
+async def update_team_endpoint(
+    team_id: str,
+    team_data: TeamCreate,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update team details (owner/admin only)"""
+    member = await get_team_member(team_id, current_user.id)
+    if not member or member["role"] not in [TeamRole.OWNER.value, TeamRole.ADMIN.value]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    team = await update_team(team_id, {"name": team_data.name})
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    members = await get_team_members(team_id)
+    team["member_count"] = len(members)
+    
+    return team
+
+@api_router.delete("/teams/{team_id}", tags=["Teams"])
+async def delete_team_endpoint(
+    team_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Delete team (owner only)"""
+    team = await get_team_by_id(team_id)
+    if not team:
+        raise HTTPException(status_code=404, detail="Team not found")
+    
+    if team["owner_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="Only owner can delete team")
+    
+    await delete_team(team_id)
+    return {"message": "Team deleted successfully"}
+
+@api_router.get("/teams/{team_id}/members", response_model=List[TeamMemberResponse], tags=["Teams"])
+async def list_team_members(
+    team_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get all team members"""
+    # Check if user is member
+    member = await get_team_member(team_id, current_user.id)
+    if not member:
+        raise HTTPException(status_code=403, detail="Not a team member")
+    
+    members = await get_team_members(team_id)
+    
+    # Enrich with user data
+    for m in members:
+        user = await get_user_by_id(m["user_id"])
+        if user:
+            m["username"] = user.get("username")
+            m["email"] = user.get("email")
+    
+    return members
+
+@api_router.post("/teams/{team_id}/invite", tags=["Teams"])
+async def invite_team_member(
+    team_id: str,
+    invite_data: TeamInvite,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Invite user to team (owner/admin only)"""
+    member = await get_team_member(team_id, current_user.id)
+    if not member or member["role"] not in [TeamRole.OWNER.value, TeamRole.ADMIN.value]:
+        raise HTTPException(status_code=403, detail="Not authorized to invite")
+    
+    # Find user by email
+    invited_user = await get_user_by_email(invite_data.email)
+    if not invited_user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if already member
+    existing = await get_team_member(team_id, invited_user["id"])
+    if existing:
+        raise HTTPException(status_code=400, detail="User already in team")
+    
+    # Create team member record
+    member_dict = {
+        "id": str(uuid.uuid4()),
+        "team_id": team_id,
+        "user_id": invited_user["id"],
+        "role": invite_data.role.value
+    }
+    await add_team_member(member_dict)
+    
+    # Create notification
+    notification_dict = {
+        "id": str(uuid.uuid4()),
+        "user_id": invited_user["id"],
+        "type": "TEAM_INVITE",
+        "title": "Team Invitation",
+        "message": f"You've been invited to join {await get_team_by_id(team_id)}",
+        "is_read": False
+    }
+    await create_notification(notification_dict)
+    
+    return {"message": "Invitation sent", "user_id": invited_user["id"]}
+
+@api_router.post("/teams/{team_id}/accept", tags=["Teams"])
+async def accept_team_invitation(
+    team_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Accept team invitation"""
+    member = await get_team_member(team_id, current_user.id)
+    if not member:
+        raise HTTPException(status_code=404, detail="No invitation found")
+    
+    if member.get("joined_at"):
+        raise HTTPException(status_code=400, detail="Already accepted")
+    
+    await accept_team_invite(team_id, current_user.id)
+    return {"message": "Team invitation accepted"}
+
+@api_router.put("/teams/{team_id}/members/{user_id}/role", tags=["Teams"])
+async def update_member_role(
+    team_id: str,
+    user_id: str,
+    role: TeamRole = Query(...),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Update team member role (owner/admin only)"""
+    member = await get_team_member(team_id, current_user.id)
+    if not member or member["role"] not in [TeamRole.OWNER.value, TeamRole.ADMIN.value]:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Can't change owner role
+    target_member = await get_team_member(team_id, user_id)
+    if target_member and target_member["role"] == TeamRole.OWNER.value:
+        raise HTTPException(status_code=400, detail="Cannot change owner role")
+    
+    await update_team_member_role(team_id, user_id, role.value)
+    return {"message": "Role updated"}
+
+@api_router.delete("/teams/{team_id}/members/{user_id}", tags=["Teams"])
+async def remove_member(
+    team_id: str,
+    user_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Remove team member (owner/admin only or self)"""
+    member = await get_team_member(team_id, current_user.id)
+    
+    # Allow self-removal or owner/admin removal
+    if user_id != current_user.id:
+        if not member or member["role"] not in [TeamRole.OWNER.value, TeamRole.ADMIN.value]:
+            raise HTTPException(status_code=403, detail="Not authorized")
+    
+    # Can't remove owner
+    target_member = await get_team_member(team_id, user_id)
+    if target_member and target_member["role"] == TeamRole.OWNER.value:
+        raise HTTPException(status_code=400, detail="Cannot remove owner")
+    
+    await remove_team_member(team_id, user_id)
+    return {"message": "Member removed"}
+
+
 # REAL-TIME COLLABORATION (Socket.IO)
 # ============================================================================
 

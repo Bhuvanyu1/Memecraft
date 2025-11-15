@@ -67,31 +67,28 @@ class AIService:
             raise Exception(f"Failed to generate image: {str(e)}")
     
     async def suggest_captions(self, image_url: str, context: Optional[str] = None) -> List[str]:
-        """Generate caption suggestions using GPT-4 Vision"""
+        """Generate caption suggestions using GPT-4o via Emergent LLM key"""
         try:
-            prompt = f"Generate 5 funny and viral-worthy meme captions for this image."
+            prompt = f"Generate 5 funny and viral-worthy meme captions. Be creative and humorous. Return only the captions, one per line, no numbers or bullets."
             if context:
                 prompt += f" Context: {context}"
-            prompt += " Return only the captions, one per line. Be creative and humorous."
             
-            response = await client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": prompt},
-                            {"type": "image_url", "image_url": {"url": image_url}}
-                        ]
-                    }
-                ],
-                max_tokens=500
-            )
+            logger.info("Generating meme captions...")
             
-            captions_text = response.choices[0].message.content
-            captions = [c.strip() for c in captions_text.split('\n') if c.strip()]
+            # Create a new chat instance for this request
+            caption_chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=f"caption-{random.randint(1000, 9999)}",
+                system_message="You are a creative meme caption generator. Generate funny, viral-worthy captions."
+            ).with_model("openai", "gpt-4o")
             
-            logger.info(f"Generated {len(captions)} captions for image")
+            user_message = UserMessage(text=prompt)
+            response = await caption_chat.send_message(user_message)
+            
+            captions = [c.strip() for c in response.split('\n') if c.strip()]
+            captions = [c.lstrip('0123456789.-•* ') for c in captions]  # Remove numbering
+            
+            logger.info(f"Generated {len(captions)} captions")
             return captions[:5]  # Return max 5 captions
             
         except Exception as e:

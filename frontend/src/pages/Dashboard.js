@@ -229,18 +229,18 @@ const Dashboard = () => {
                 {trends.map((trend) => (
                   <Card 
                     key={trend.id}
-                    className="cursor-pointer hover:border-green-500 transition-colors bg-slate-800/50 border-slate-700 overflow-hidden group"
+                    className="cursor-pointer hover:border-primary-green hover:bg-bg-hover transition-all duration-200 bg-bg-card border-slate-700 overflow-hidden group rounded-xl"
                     onClick={() => navigate(`/editor/new?trendId=${trend.id}`)}
                     data-testid={`trend-card-${trend.id}`}
                   >
-                    <div className="aspect-video relative overflow-hidden">
+                    <div className="aspect-video relative overflow-hidden rounded-t-xl">
                       <img
                         src={trend.image_url}
                         alt={trend.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                       />
                       <Badge 
-                        className={`absolute top-2 right-2 ${getPlatformBadgeColor(trend.platform)}`}
+                        className={`absolute top-3 right-3 ${getPlatformBadgeColor(trend.platform)}`}
                         data-testid={`trend-platform-${trend.id}`}
                       >
                         {trend.platform}
@@ -248,11 +248,11 @@ const Dashboard = () => {
                     </div>
 
                     <CardContent className="p-4">
-                      <h3 className="font-semibold text-white mb-2 line-clamp-2" data-testid={`trend-title-${trend.id}`}>
+                      <h3 className="font-semibold text-text-primary mb-2 line-clamp-2" data-testid={`trend-title-${trend.id}`}>
                         {trend.title}
                       </h3>
                       
-                      <p className="text-sm text-slate-400 mb-3 line-clamp-2">
+                      <p className="text-sm text-text-secondary mb-3 line-clamp-2">
                         {trend.description}
                       </p>
 
@@ -264,8 +264,8 @@ const Dashboard = () => {
                           </span>
                         </div>
 
-                        <Button size="sm" variant="ghost" data-testid={`trend-use-button-${trend.id}`}>
-                          Use Template →
+                        <Button size="sm" className="bg-primary-green text-gray-900 hover:opacity-90 px-4 py-2 rounded" data-testid={`trend-use-button-${trend.id}`}>
+                          Use Template
                         </Button>
                       </div>
                     </CardContent>

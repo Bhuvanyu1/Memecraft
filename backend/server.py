@@ -914,6 +914,98 @@ async def get_user_analytics(
 @api_router.get("/analytics/teams/{team_id}/summary", response_model=TeamAnalyticsSummary, tags=["Analytics"])
 async def get_team_analytics(
     team_id: str,
+
+# ============================================================================
+# SOCIAL MEDIA POSTING ROUTES
+# ============================================================================
+
+@api_router.get("/social/status", tags=["Social Media"])
+async def get_social_media_status(
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get configuration status for all social media platforms"""
+    return social_media_service.get_platform_status()
+
+@api_router.post("/social/post", tags=["Social Media"])
+async def post_to_social_media(
+    post_data: SocialMediaPost,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Post meme to a single social media platform"""
+    # Verify meme belongs to user
+    meme = await get_meme_by_id(post_data.meme_id)
+    if not meme or meme["user_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    image_url = meme.get("thumbnail_url", "")
+    
+    # Post to platform
+    if post_data.platform == Platform.TWITTER:
+        result = await social_media_service.post_to_twitter(image_url, post_data.caption)
+    elif post_data.platform == Platform.REDDIT:
+        title = post_data.title or post_data.caption
+        result = await social_media_service.post_to_reddit(
+            post_data.subreddit,
+            image_url,
+            title
+        )
+    elif post_data.platform == Platform.INSTAGRAM:
+        result = await social_media_service.post_to_instagram(image_url, post_data.caption)
+    else:
+        raise HTTPException(status_code=400, detail="Unsupported platform")
+    
+    # Track in analytics if successful
+    if result.get("success"):
+        analytics_dict = {
+            "id": str(uuid.uuid4()),
+            "meme_id": post_data.meme_id,
+            "user_id": current_user.id,
+            "platform": post_data.platform.value,
+            "url": result.get("url", ""),
+            "engagement_data": {}
+        }
+        await create_analytics_record(analytics_dict)
+    
+    return result
+
+@api_router.post("/social/post-multiple", tags=["Social Media"])
+async def post_to_multiple_platforms(
+    post_data: MultiPlatformPost,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Post meme to multiple social media platforms simultaneously"""
+    # Verify meme belongs to user
+    meme = await get_meme_by_id(post_data.meme_id)
+    if not meme or meme["user_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    image_url = meme.get("thumbnail_url", "")
+    
+    # Post to all platforms
+    result = await social_media_service.post_to_multiple_platforms(
+        [p.value for p in post_data.platforms],
+        image_url,
+        post_data.caption,
+        post_data.title,
+        post_data.subreddit
+    )
+    
+    # Track successful posts in analytics
+    for platform, platform_result in result.get("results", {}).items():
+        if platform_result.get("success"):
+            analytics_dict = {
+                "id": str(uuid.uuid4()),
+                "meme_id": post_data.meme_id,
+                "user_id": current_user.id,
+                "platform": platform.upper(),
+                "url": platform_result.get("url", ""),
+                "engagement_data": {}
+            }
+            await create_analytics_record(analytics_dict)
+    
+    return result
+
+
     current_user: UserResponse = Depends(get_current_user)
 ):
     """Get analytics summary for team"""

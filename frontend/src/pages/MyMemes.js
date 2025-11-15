@@ -80,9 +80,9 @@ const MyMemes = () => {
   );
 
   return (
-    <div className="min-h-screen bg-slate-950" data-testid="my-memes-page">
+    <div className="min-h-screen bg-bg-darker" data-testid="my-memes-page">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-slate-800 bg-bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -90,18 +90,19 @@ const MyMemes = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/dashboard')}
+                className="hover:bg-bg-hover"
                 data-testid="back-button"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Dashboard
               </Button>
 
-              <h1 className="text-2xl font-bold text-white">My Memes</h1>
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-green to-primary-blue">My Memes</h1>
             </div>
 
             <Button
               onClick={() => navigate('/editor/new')}
-              className="bg-gradient-to-r from-green-500 to-blue-500"
+              className="bg-gradient-to-r from-primary-green to-primary-blue hover:opacity-90"
               data-testid="create-new-button"
             >
               <Plus className="h-4 w-4 mr-2" />
@@ -110,12 +111,12 @@ const MyMemes = () => {
           </div>
 
           <div className="mt-4 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-text-muted" />
             <Input
               placeholder="Search memes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 bg-bg-darker border-slate-700 text-text-primary"
               data-testid="search-input"
             />
           </div>
@@ -126,21 +127,21 @@ const MyMemes = () => {
       <main className="container mx-auto px-4 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-12" data-testid="memes-loading">
-            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary-green" />
           </div>
         ) : filteredMemes.length === 0 ? (
           <div className="text-center py-12" data-testid="memes-empty">
             <div className="text-6xl mb-4">🎨</div>
-            <h3 className="text-xl font-semibold text-white mb-2">
+            <h3 className="text-xl font-semibold text-text-primary mb-2">
               {searchQuery ? 'No memes found' : 'No memes yet'}
             </h3>
-            <p className="text-slate-400 mb-6">
+            <p className="text-text-secondary mb-6">
               {searchQuery
                 ? 'Try a different search term'
                 : 'Create your first meme to get started'}
             </p>
             {!searchQuery && (
-              <Button onClick={() => navigate('/editor/new')} data-testid="create-first-button">
+              <Button onClick={() => navigate('/editor/new')} className="bg-primary-green text-gray-900 hover:opacity-90" data-testid="create-first-button">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Meme
               </Button>
@@ -151,7 +152,7 @@ const MyMemes = () => {
             {filteredMemes.map((meme) => (
               <Card
                 key={meme.id}
-                className="bg-slate-900/50 border-slate-800 overflow-hidden group hover:border-green-500 transition-colors"
+                className="bg-bg-card border-slate-800 rounded-xl overflow-hidden group hover:border-primary-green transition-colors"
                 data-testid={`meme-card-${meme.id}`}
               >
                 <div
@@ -165,7 +166,7 @@ const MyMemes = () => {
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-slate-800">
+                    <div className="w-full h-full flex items-center justify-center bg-bg-darker">
                       <span className="text-4xl">🎭</span>
                     </div>
                   )}
@@ -175,13 +176,13 @@ const MyMemes = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <h3
-                        className="font-semibold text-white truncate cursor-pointer hover:text-green-400"
+                        className="font-semibold text-text-primary truncate cursor-pointer hover:text-primary-green"
                         onClick={() => handleEdit(meme.id)}
                         data-testid={`meme-title-${meme.id}`}
                       >
                         {meme.title}
                       </h3>
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs text-text-secondary mt-1">
                         {new Date(meme.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -191,15 +192,16 @@ const MyMemes = () => {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="h-8 w-8 p-0"
+                          className="h-8 w-8 p-0 hover:bg-bg-hover"
                           data-testid={`meme-menu-${meme.id}`}
                         >
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
+                      <DropdownMenuContent align="end" className="bg-bg-card border-slate-700">
                         <DropdownMenuItem
                           onClick={() => handleEdit(meme.id)}
+                          className="text-text-primary hover:bg-bg-hover"
                           data-testid={`meme-edit-${meme.id}`}
                         >
                           <Edit className="h-4 w-4 mr-2" />
@@ -207,6 +209,7 @@ const MyMemes = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDuplicate(meme.id)}
+                          className="text-text-primary hover:bg-bg-hover"
                           data-testid={`meme-duplicate-${meme.id}`}
                         >
                           <Copy className="h-4 w-4 mr-2" />
@@ -214,7 +217,7 @@ const MyMemes = () => {
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleDelete(meme.id)}
-                          className="text-red-500"
+                          className="text-accent-error hover:bg-accent-error/10"
                           data-testid={`meme-delete-${meme.id}`}
                         >
                           <Trash2 className="h-4 w-4 mr-2" />

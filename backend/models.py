@@ -189,6 +189,30 @@ class TeamMember(BaseDBModel):
     invited_at: datetime = Field(default_factory=datetime.utcnow)
     joined_at: Optional[datetime] = None
 
+
+class TeamResponse(BaseModel):
+    id: str
+    name: str
+    owner_id: str
+    plan_type: PlanType
+    storage_limit: int
+    member_count: int = 0
+    created_at: datetime
+
+class TeamMemberResponse(BaseModel):
+    id: str
+    team_id: str
+    user_id: str
+    role: TeamRole
+    invited_at: datetime
+    joined_at: Optional[datetime] = None
+    username: Optional[str] = None
+    email: Optional[str] = None
+
+class TeamInvite(BaseModel):
+    email: str
+    role: TeamRole = TeamRole.EDITOR
+
 # Analytics Models
 class Analytics(BaseDBModel):
     meme_id: str

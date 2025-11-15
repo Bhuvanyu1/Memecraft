@@ -1016,18 +1016,6 @@ async def post_to_multiple_platforms(
     return result
 
 
-    current_user: UserResponse = Depends(get_current_user)
-):
-    """Get analytics summary for team"""
-    # Verify user is team member
-    member = await get_team_member(team_id, current_user.id)
-    if not member:
-        raise HTTPException(status_code=403, detail="Not a team member")
-    
-    summary = await get_team_analytics_summary(team_id)
-    return summary
-
-
 async def remove_member(
     team_id: str,
     user_id: str,

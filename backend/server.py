@@ -860,6 +860,70 @@ async def update_member_role(
     return {"message": "Role updated"}
 
 @api_router.delete("/teams/{team_id}/members/{user_id}", tags=["Teams"])
+
+# ============================================================================
+# ANALYTICS ROUTES
+# ============================================================================
+
+@api_router.post("/analytics", tags=["Analytics"])
+async def track_engagement(
+    analytics_data: AnalyticsCreate,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Track meme engagement on social platforms"""
+    # Verify meme belongs to user
+    meme = await get_meme_by_id(analytics_data.meme_id)
+    if not meme or meme["user_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    analytics_dict = {
+        "id": str(uuid.uuid4()),
+        "meme_id": analytics_data.meme_id,
+        "user_id": current_user.id,
+        "platform": analytics_data.platform.value,
+        "url": analytics_data.url,
+        "engagement_data": analytics_data.engagement_data
+    }
+    
+    await create_analytics_record(analytics_dict)
+    return {"message": "Analytics tracked", "id": analytics_dict["id"]}
+
+@api_router.get("/analytics/memes/{meme_id}", tags=["Analytics"])
+async def get_meme_analytics_endpoint(
+    meme_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get analytics for a specific meme"""
+    meme = await get_meme_by_id(meme_id)
+    if not meme or meme["user_id"] != current_user.id:
+        raise HTTPException(status_code=403, detail="Not authorized")
+    
+    analytics = await get_meme_analytics(meme_id)
+    return analytics
+
+@api_router.get("/analytics/user/summary", response_model=UserAnalyticsSummary, tags=["Analytics"])
+async def get_user_analytics(
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get analytics summary for current user"""
+    summary = await get_user_analytics_summary(current_user.id)
+    return summary
+
+@api_router.get("/analytics/teams/{team_id}/summary", response_model=TeamAnalyticsSummary, tags=["Analytics"])
+async def get_team_analytics(
+    team_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get analytics summary for team"""
+    # Verify user is team member
+    member = await get_team_member(team_id, current_user.id)
+    if not member:
+        raise HTTPException(status_code=403, detail="Not a team member")
+    
+    summary = await get_team_analytics_summary(team_id)
+    return summary
+
+
 async def remove_member(
     team_id: str,
     user_id: str,

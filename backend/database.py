@@ -200,6 +200,103 @@ async def accept_team_invite(team_id: str, user_id: str) -> bool:
         {'team_id': team_id, 'user_id': user_id},
         {'$set': {'joined_at': datetime.utcnow().isoformat(), 'updated_at': datetime.utcnow().isoformat()}}
     )
+
+
+# Analytics operations
+async def create_analytics_record(analytics_data: dict) -> dict:
+    analytics_data['tracked_at'] = datetime.utcnow().isoformat()
+    await analytics_collection.insert_one(analytics_data)
+    return exclude_id(analytics_data)
+
+async def get_meme_analytics(meme_id: str) -> List[dict]:
+    analytics = await analytics_collection.find({'meme_id': meme_id}).to_list(1000)
+    return [exclude_id(a) for a in analytics]
+
+async def get_user_analytics_summary(user_id: str) -> dict:
+    """Get analytics summary for user"""
+    # Get total memes
+    total_memes = await memes_collection.count_documents({'user_id': user_id})
+    
+    # Get total views (from analytics)
+    analytics = await analytics_collection.find({'user_id': user_id}).to_list(10000)
+    total_views = sum(a.get('engagement_data', {}).get('views', 0) for a in analytics)
+    total_likes = sum(a.get('engagement_data', {}).get('likes', 0) for a in analytics)
+    total_shares = sum(a.get('engagement_data', {}).get('shares', 0) for a in analytics)
+    
+    # Get storage used
+    user = await get_user_by_id(user_id)
+    storage_used = user.get('storage_used', 0) if user else 0
+    
+    # Get meme performance over time (last 30 days)
+    from datetime import timedelta
+    thirty_days_ago = (datetime.utcnow() - timedelta(days=30)).isoformat()
+    recent_analytics = await analytics_collection.find({
+        'user_id': user_id,
+        'tracked_at': {'$gte': thirty_days_ago}
+    }).to_list(10000)
+    
+    # Group by date
+    daily_stats = {}
+    for a in recent_analytics:
+        date = a['tracked_at'][:10]  # Get date part
+        if date not in daily_stats:
+            daily_stats[date] = {'views': 0, 'likes': 0, 'shares': 0}
+        engagement = a.get('engagement_data', {})
+        daily_stats[date]['views'] += engagement.get('views', 0)
+        daily_stats[date]['likes'] += engagement.get('likes', 0)
+        daily_stats[date]['shares'] += engagement.get('shares', 0)
+    
+    return {
+        'total_memes': total_memes,
+        'total_views': total_views,
+        'total_likes': total_likes,
+        'total_shares': total_shares,
+        'storage_used': storage_used,
+        'daily_stats': daily_stats
+    }
+
+async def get_team_analytics_summary(team_id: str) -> dict:
+    """Get analytics summary for team"""
+    # Get team members
+    members = await get_team_members(team_id)
+    member_ids = [m['user_id'] for m in members]
+    
+    # Get total memes by team members
+    total_memes = await memes_collection.count_documents({'user_id': {'$in': member_ids}})
+    
+    # Get team engagement
+    analytics = await analytics_collection.find({'user_id': {'$in': member_ids}}).to_list(10000)
+    total_views = sum(a.get('engagement_data', {}).get('views', 0) for a in analytics)
+    total_likes = sum(a.get('engagement_data', {}).get('likes', 0) for a in analytics)
+    total_shares = sum(a.get('engagement_data', {}).get('shares', 0) for a in analytics)
+    
+    # Top performers
+    meme_performance = {}
+    for a in analytics:
+        meme_id = a['meme_id']
+        if meme_id not in meme_performance:
+            meme_performance[meme_id] = {'views': 0, 'likes': 0, 'shares': 0}
+        engagement = a.get('engagement_data', {})
+        meme_performance[meme_id]['views'] += engagement.get('views', 0)
+        meme_performance[meme_id]['likes'] += engagement.get('likes', 0)
+        meme_performance[meme_id]['shares'] += engagement.get('shares', 0)
+    
+    # Sort by total engagement
+    top_memes = sorted(
+        [(k, v['views'] + v['likes'] * 2 + v['shares'] * 3) for k, v in meme_performance.items()],
+        key=lambda x: x[1],
+        reverse=True
+    )[:10]
+    
+    return {
+        'total_memes': total_memes,
+        'total_members': len(members),
+        'total_views': total_views,
+        'total_likes': total_likes,
+        'total_shares': total_shares,
+        'top_memes': [{'meme_id': m[0], 'engagement_score': m[1]} for m in top_memes]
+    }
+
     return result.modified_count > 0
 
 # Notification operations

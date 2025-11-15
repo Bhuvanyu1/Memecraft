@@ -2,6 +2,34 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Primary Colors from PRD */
+    --primary-green: #00ff88;
+    --primary-purple: #8b5cf6;
+    --primary-blue: #3b82f6;
+    --primary-yellow: #fbbf24;
+    --primary-pink: #ec4899;
+
+    /* Background Colors from PRD */
+    --bg-dark: #020617;
+    --bg-darker: #0f172a;
+    --bg-card: #1e293b;
+    --bg-hover: #334155;
+
+    /* Text Colors from PRD */
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-muted: #64748b;
+
+    /* Accent Colors from PRD */
+    --accent-fire: #ff4500;
+    --accent-success: #10b981;
+    --accent-warning: #f59e0b;
+    --accent-error: #ef4444;
+  }
+}
+
 body {
     margin: 0;
     font-family:
@@ -10,6 +38,8 @@ body {
         sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    background-color: var(--bg-darker);
+    color: var(--text-primary);
 }
 
 code {

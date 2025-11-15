@@ -1,35 +1,66 @@
 import os
 import random
+import base64
+import io
 from typing import List, Optional
-from openai import AsyncOpenAI
-from config import settings
+from dotenv import load_dotenv
 import logging
+from PIL import Image as PILImage
+import replicate
+import asyncio
+
+# Load environment variables
+load_dotenv()
+
+# Import Emergent Integrations
+from emergentintegrations.llm.chat import LlmChat, UserMessage
+from emergentintegrations.llm.openai.image_generation import OpenAIImageGeneration
 
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI client with Emergent LLM key
-client = AsyncOpenAI(
-    api_key=settings.OPENAI_API_KEY,
-    base_url=settings.OPENAI_BASE_URL
-)
+# Get API keys from environment
+EMERGENT_LLM_KEY = os.getenv("EMERGENT_LLM_KEY")
+REPLICATE_API_TOKEN = os.getenv("REPLICATE_API_TOKEN", "")
 
 class AIService:
-    """AI service for image generation and caption suggestions using Emergent LLM key"""
+    """AI service for image generation, face swap, background removal, and meme generation using real AI APIs"""
+    
+    def __init__(self):
+        # Initialize LLM Chat for text generation
+        self.llm_chat = LlmChat(
+            api_key=EMERGENT_LLM_KEY,
+            session_id="meme-generator",
+            system_message="You are a creative meme generator AI. Generate funny, viral-worthy meme content."
+        ).with_model("openai", "gpt-4o")
+        
+        # Initialize Image Generation
+        self.image_gen = OpenAIImageGeneration(api_key=EMERGENT_LLM_KEY)
+        
+        # Set Replicate API token if available
+        if REPLICATE_API_TOKEN:
+            os.environ["REPLICATE_API_TOKEN"] = REPLICATE_API_TOKEN
     
     async def generate_image(self, prompt: str, width: int = 1024, height: int = 1024) -> str:
-        """Generate image using DALL-E via Emergent LLM key"""
+        """Generate image using gpt-image-1 (latest DALL-E) via Emergent LLM key"""
         try:
-            response = await client.images.generate(
-                model="dall-e-3",
+            logger.info(f"Generating image for prompt: {prompt[:50]}...")
+            
+            # Generate images using emergentintegrations
+            images = await self.image_gen.generate_images(
                 prompt=prompt,
-                size=f"{width}x{height}" if width == height else "1024x1024",
-                quality="standard",
-                n=1,
+                model="gpt-image-1",
+                number_of_images=1
             )
             
-            image_url = response.data[0].url
-            logger.info(f"Generated image for prompt: {prompt[:50]}...")
-            return image_url
+            if images and len(images) > 0:
+                # Convert image bytes to base64 data URL
+                image_base64 = base64.b64encode(images[0]).decode('utf-8')
+                image_url = f"data:image/png;base64,{image_base64}"
+                
+                logger.info(f"Successfully generated image")
+                return image_url
+            else:
+                raise Exception("No image was generated")
             
         except Exception as e:
             logger.error(f"Image generation error: {str(e)}")

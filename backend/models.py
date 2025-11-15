@@ -230,6 +230,22 @@ class TeamAnalyticsSummary(BaseModel):
     total_members: int
     total_views: int
     total_likes: int
+
+
+class SocialMediaPost(BaseModel):
+    meme_id: str
+    platform: Platform
+    caption: str
+    title: Optional[str] = None  # For Reddit
+    subreddit: Optional[str] = "memes"  # For Reddit
+
+class MultiPlatformPost(BaseModel):
+    meme_id: str
+    platforms: List[Platform]
+    caption: str
+    title: Optional[str] = None
+    subreddit: Optional[str] = "memes"
+
     total_shares: int
     top_memes: List[Dict[str, Any]]
 

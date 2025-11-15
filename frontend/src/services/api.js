@@ -83,4 +83,36 @@ export const commentAPI = {
   delete: (id) => api.delete(`/comments/${id}`),
 };
 
+
+export const teamAPI = {
+  list: () => api.get('/teams'),
+  get: (id) => api.get(`/teams/${id}`),
+  create: (data) => api.post('/teams', data),
+  update: (id, data) => api.put(`/teams/${id}`, data),
+  delete: (id) => api.delete(`/teams/${id}`),
+  listMembers: (id) => api.get(`/teams/${id}/members`),
+  invite: (id, data) => api.post(`/teams/${id}/invite`, data),
+  acceptInvite: (id) => api.post(`/teams/${id}/accept`),
+  updateMemberRole: (teamId, userId, role) => api.put(`/teams/${teamId}/members/${userId}/role`, null, { params: { role } }),
+  removeMember: (teamId, userId) => api.delete(`/teams/${teamId}/members/${userId}`),
+};
+
+export const analyticsAPI = {
+  track: (data) => api.post('/analytics', data),
+  getMemeAnalytics: (memeId) => api.get(`/analytics/memes/${memeId}`),
+  getUserSummary: () => api.get('/analytics/user/summary'),
+  getTeamSummary: (teamId) => api.get(`/analytics/teams/${teamId}/summary`),
+};
+
+export const socialAPI = {
+  getStatus: () => api.get('/social/status'),
+  post: (data) => api.post('/social/post', data),
+  postMultiple: (data) => api.post('/social/post-multiple', data),
+};
+
+export const collaborationAPI = {
+  getActiveUsers: (memeId) => api.get(`/collaboration/active-users/${memeId}`),
+};
+
+
 export default api;

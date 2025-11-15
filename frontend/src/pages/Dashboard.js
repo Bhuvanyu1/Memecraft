@@ -68,7 +68,7 @@ const Dashboard = () => {
           <div className="flex items-center space-x-4">
             <Button
               onClick={() => navigate('/editor/new')}
-              className="bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+              className="bg-gradient-to-r from-primary-green to-primary-blue hover:opacity-90 transition-opacity"
               data-testid="create-new-button"
             >
               <Plus className="h-4 w-4 mr-2" />

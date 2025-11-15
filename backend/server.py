@@ -36,6 +36,7 @@ from database import (
     close_db_connection
 )
 from ai_services import ai_service
+from social_media import social_media_service
 from trends_service import trends_service
 from storage import storage_service
 from oauth_handlers import oauth_handler

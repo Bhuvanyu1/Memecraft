@@ -156,11 +156,10 @@ Example:
             raise Exception(f"Failed to generate meme: {str(e)}")
     
     async def predict_viral_score(self, meme_data: dict) -> int:
-        """Predict viral potential of a meme (simplified version)"""
+        """Predict viral potential of a meme using GPT-4o"""
         try:
-            # Use GPT-4 to analyze meme potential
             prompt = f"""Analyze this meme and predict its viral potential on a scale of 0-100.
-            
+
 Meme title: {meme_data.get('title', 'Untitled')}
 Tags: {', '.join(meme_data.get('tags', []))}
 
@@ -169,17 +168,22 @@ Consider factors like:
 - Humor quality
 - Current trends
 - Visual appeal
+- Meme format popularity
 
-Respond with just a number between 0-100."""
+Respond with ONLY a number between 0-100, nothing else."""
             
-            response = await client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=10,
-                temperature=0.5
-            )
+            logger.info("Predicting viral score...")
             
-            score_text = response.choices[0].message.content.strip()
+            score_chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=f"score-{random.randint(1000, 9999)}",
+                system_message="You are a meme viral potential analyzer. Respond only with a number."
+            ).with_model("openai", "gpt-4o")
+            
+            user_message = UserMessage(text=prompt)
+            response = await score_chat.send_message(user_message)
+            
+            score_text = response.strip()
             score = int(''.join(filter(str.isdigit, score_text)))
             score = max(0, min(100, score))  # Clamp between 0-100
             
@@ -190,5 +194,59 @@ Respond with just a number between 0-100."""
             logger.error(f"Viral prediction error: {str(e)}")
             # Return random score as fallback
             return random.randint(40, 85)
+    
+    async def face_swap(self, source_image_url: str, target_image_url: str) -> str:
+        """Perform face swap using Replicate API"""
+        try:
+            if not REPLICATE_API_TOKEN:
+                raise Exception("Replicate API token not configured. Please add REPLICATE_API_TOKEN to .env file")
+            
+            logger.info("Starting face swap...")
+            
+            # Run face swap using Replicate in a thread to avoid blocking
+            def run_face_swap():
+                output = replicate.run(
+                    "codeplugtech/face-swap:278a81e7ebb22db98bcba54de985d22cc1abeead2754eb1f2af717247be69b34",
+                    input={
+                        "source_image": source_image_url,
+                        "target_image": target_image_url
+                    }
+                )
+                return output
+            
+            # Run in executor to make it async
+            loop = asyncio.get_event_loop()
+            output = await loop.run_in_executor(None, run_face_swap)
+            
+            # Output is typically a URL
+            result_url = str(output) if output else None
+            
+            if not result_url:
+                raise Exception("Face swap did not return a result")
+            
+            logger.info("Face swap completed successfully")
+            return result_url
+            
+        except Exception as e:
+            logger.error(f"Face swap error: {str(e)}")
+            raise Exception(f"Failed to perform face swap: {str(e)}")
+    
+    async def remove_background(self, image_data: bytes) -> bytes:
+        """Remove background from image using rembg library"""
+        try:
+            logger.info("Removing background from image...")
+            
+            from rembg import remove
+            
+            # Run rembg in executor to avoid blocking
+            loop = asyncio.get_event_loop()
+            output_data = await loop.run_in_executor(None, remove, image_data)
+            
+            logger.info("Background removed successfully")
+            return output_data
+            
+        except Exception as e:
+            logger.error(f"Background removal error: {str(e)}")
+            raise Exception(f"Failed to remove background: {str(e)}")
 
 ai_service = AIService()

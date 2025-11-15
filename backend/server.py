@@ -18,6 +18,7 @@ from models import (
     BackgroundRemoveRequest, FaceSwapRequest,
     TeamCreate, TeamResponse, TeamMemberResponse, TeamInvite, TeamRole,
     AnalyticsCreate, UserAnalyticsSummary, TeamAnalyticsSummary,
+    SocialMediaPost, MultiPlatformPost,
     Provider, Platform, PlanType
 )
 from auth import get_password_hash, authenticate_user, create_access_token, get_current_user

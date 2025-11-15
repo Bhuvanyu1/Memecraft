@@ -194,15 +194,15 @@ const Dashboard = () => {
         </div>
 
         {/* Trending Memes */}
-        <Card className="bg-slate-900/50 border-slate-800">
+        <Card className="bg-bg-card border-slate-800 rounded-xl">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-2xl text-white flex items-center">
-                  <TrendingUp className="h-6 w-6 mr-2 text-green-500" />
+                <CardTitle className="text-2xl text-text-primary flex items-center">
+                  <TrendingUp className="h-6 w-6 mr-2 text-primary-green" />
                   Trending Memes
                 </CardTitle>
-                <CardDescription>Most viral content right now</CardDescription>
+                <CardDescription className="text-text-secondary">Most viral content right now</CardDescription>
               </div>
 
               <Tabs value={selectedPlatform} onValueChange={setSelectedPlatform}>

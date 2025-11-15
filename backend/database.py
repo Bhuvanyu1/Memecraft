@@ -155,6 +155,53 @@ async def get_user_teams(user_id: str) -> List[dict]:
     teams = await teams_collection.find({'id': {'$in': team_ids}}).to_list(100)
     return [exclude_id(team) for team in teams]
 
+
+
+async def update_team(team_id: str, team_data: dict) -> Optional[dict]:
+    team_data['updated_at'] = datetime.utcnow().isoformat()
+    await teams_collection.update_one({'id': team_id}, {'$set': team_data})
+    return await get_team_by_id(team_id)
+
+async def delete_team(team_id: str) -> bool:
+    # Delete team members
+    await team_members_collection.delete_many({'team_id': team_id})
+    # Delete team
+    result = await teams_collection.delete_one({'id': team_id})
+    return result.deleted_count > 0
+
+# Team Member operations
+async def add_team_member(member_data: dict) -> dict:
+    member_data['created_at'] = datetime.utcnow().isoformat()
+    member_data['updated_at'] = datetime.utcnow().isoformat()
+    await team_members_collection.insert_one(member_data)
+    return exclude_id(member_data)
+
+async def get_team_members(team_id: str) -> List[dict]:
+    members = await team_members_collection.find({'team_id': team_id}).to_list(1000)
+    return [exclude_id(m) for m in members]
+
+async def get_team_member(team_id: str, user_id: str) -> Optional[dict]:
+    member = await team_members_collection.find_one({'team_id': team_id, 'user_id': user_id})
+    return exclude_id(member)
+
+async def update_team_member_role(team_id: str, user_id: str, role: str) -> bool:
+    result = await team_members_collection.update_one(
+        {'team_id': team_id, 'user_id': user_id},
+        {'$set': {'role': role, 'updated_at': datetime.utcnow().isoformat()}}
+    )
+    return result.modified_count > 0
+
+async def remove_team_member(team_id: str, user_id: str) -> bool:
+    result = await team_members_collection.delete_one({'team_id': team_id, 'user_id': user_id})
+    return result.deleted_count > 0
+
+async def accept_team_invite(team_id: str, user_id: str) -> bool:
+    result = await team_members_collection.update_one(
+        {'team_id': team_id, 'user_id': user_id},
+        {'$set': {'joined_at': datetime.utcnow().isoformat(), 'updated_at': datetime.utcnow().isoformat()}}
+    )
+    return result.modified_count > 0
+
 # Notification operations
 async def create_notification(notification_data: dict) -> dict:
     notification_data['created_at'] = datetime.utcnow().isoformat()

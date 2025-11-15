@@ -642,6 +642,26 @@ async def shutdown_event():
     await close_db_connection()
     logger.info("Application shutdown complete")
 
+# ============================================================================
+# REAL-TIME COLLABORATION (Socket.IO)
+# ============================================================================
+
+from collaboration import sio as collaboration_sio, app as socket_app
+
+# Mount Socket.IO app
+app.mount("/socket.io", socket_app)
+
+# Collaboration endpoints
+@api_router.get("/collaboration/active-users/{meme_id}", tags=["Collaboration"])
+async def get_active_users(
+    meme_id: str,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Get count of active users for a meme"""
+    from collaboration import get_active_users as get_users_count
+    count = get_users_count(meme_id)
+    return {"meme_id": meme_id, "active_users": count}
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8001)

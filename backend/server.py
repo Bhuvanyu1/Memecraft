@@ -432,6 +432,47 @@ async def predict_viral_endpoint(
         viral_score = await ai_service.predict_viral_score(meme)
         return {"viral_score": viral_score, "meme_id": request.meme_id}
     except Exception as e:
+
+
+@api_router.post("/ai/face-swap", tags=["AI"])
+async def face_swap_endpoint(
+    request: FaceSwapRequest,
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Perform face swap between two images using Replicate API"""
+    try:
+        result_url = await ai_service.face_swap(
+            request.source_image_url,
+            request.target_image_url
+        )
+        return {"result_url": result_url}
+    except Exception as e:
+        logger.error(f"Face swap error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@api_router.post("/ai/remove-background", tags=["AI"])
+async def remove_background_endpoint(
+    file: UploadFile = File(...),
+    current_user: UserResponse = Depends(get_current_user)
+):
+    """Remove background from an uploaded image using rembg"""
+    try:
+        # Read image data
+        image_data = await file.read()
+        
+        # Remove background
+        output_data = await ai_service.remove_background(image_data)
+        
+        # Convert to base64 for response
+        import base64
+        output_base64 = base64.b64encode(output_data).decode('utf-8')
+        result_url = f"data:image/png;base64,{output_base64}"
+        
+        return {"result_url": result_url}
+    except Exception as e:
+        logger.error(f"Background removal error: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================

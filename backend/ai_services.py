@@ -103,34 +103,52 @@ class AIService:
             ]
     
     async def generate_meme_complete(self, topic: str, humor_style: str = "sarcastic") -> dict:
-        """Generate a complete meme (text + context) using GPT-4"""
+        """Generate a complete meme (text + image) using GPT-4o and gpt-image-1"""
         try:
             prompt = f"""Generate a meme idea about "{topic}" with a {humor_style} humor style.
-            
+
 Provide:
 1. A short title/caption (max 50 chars)
-2. Top text for the meme (if applicable, max 30 chars)
-3. Bottom text for the meme (if applicable, max 30 chars)
-4. Image description for DALL-E (detailed, max 100 words)
+2. Top text for the meme (if applicable, max 30 chars, can be empty)
+3. Bottom text for the meme (if applicable, max 30 chars, can be empty)
+4. Image description for AI image generation (detailed, visual, max 100 words)
 
-Format your response as JSON with keys: title, top_text, bottom_text, image_description"""
+Format your response EXACTLY as JSON with keys: title, top_text, bottom_text, image_description
+
+Example:
+{{"title": "Monday Mood", "top_text": "ME ON MONDAY", "bottom_text": "PRETENDING TO BE OKAY", "image_description": "A tired cat with messy fur sitting at a desk with coffee"}}"""
             
-            response = await client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "user", "content": prompt}],
-                temperature=0.8,
-                response_format={"type": "json_object"}
-            )
+            logger.info(f"Generating complete meme for topic: {topic}")
+            
+            # Create meme generation chat
+            meme_chat = LlmChat(
+                api_key=EMERGENT_LLM_KEY,
+                session_id=f"meme-gen-{random.randint(1000, 9999)}",
+                system_message="You are a creative meme generator. Always respond with valid JSON only."
+            ).with_model("openai", "gpt-4o")
+            
+            user_message = UserMessage(text=prompt)
+            response = await meme_chat.send_message(user_message)
             
             import json
-            meme_data = json.loads(response.choices[0].message.content)
+            # Clean response to extract JSON
+            response = response.strip()
+            if response.startswith("```json"):
+                response = response[7:]
+            if response.startswith("```"):
+                response = response[3:]
+            if response.endswith("```"):
+                response = response[:-3]
+            response = response.strip()
+            
+            meme_data = json.loads(response)
             
             # Generate the actual image
             if 'image_description' in meme_data:
                 image_url = await self.generate_image(meme_data['image_description'])
                 meme_data['image_url'] = image_url
             
-            logger.info(f"Generated complete meme for topic: {topic}")
+            logger.info(f"Successfully generated complete meme for topic: {topic}")
             return meme_data
             
         except Exception as e:

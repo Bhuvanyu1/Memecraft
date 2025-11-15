@@ -253,6 +253,11 @@ class CaptionSuggestRequest(BaseModel):
 class BackgroundRemoveRequest(BaseModel):
     image_url: str
 
+
+class FaceSwapRequest(BaseModel):
+    source_image_url: str
+    target_image_url: str
+
 class ViralPredictRequest(BaseModel):
     meme_id: str
 

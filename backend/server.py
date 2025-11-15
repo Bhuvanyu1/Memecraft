@@ -21,12 +21,15 @@ from models import (
 )
 from auth import get_password_hash, authenticate_user, create_access_token, get_current_user
 from database import (
-    create_user, get_user_by_email, get_user_by_username,
+    create_user, get_user_by_email, get_user_by_username, get_user_by_id,
     create_meme, get_meme_by_id, get_user_memes, update_meme, delete_meme,
     create_template, get_template_by_id, get_templates, update_template_votes,
     get_trends, create_trend,
     get_user_notifications, mark_notification_read, create_notification,
     create_comment, get_meme_comments, resolve_comment, delete_comment,
+    create_team, get_team_by_id, get_user_teams, update_team, delete_team,
+    add_team_member, get_team_members, get_team_member, update_team_member_role,
+    remove_team_member, accept_team_invite,
     close_db_connection
 )
 from ai_services import ai_service

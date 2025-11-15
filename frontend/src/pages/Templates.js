@@ -60,9 +60,9 @@ const Templates = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950" data-testid="templates-page">
+    <div className="min-h-screen bg-bg-darker" data-testid="templates-page">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm sticky top-0 z-50">
+      <header className="border-b border-slate-800 bg-bg-card/50 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
@@ -70,13 +70,14 @@ const Templates = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => navigate('/dashboard')}
+                className="hover:bg-bg-hover"
                 data-testid="back-button"
               >
                 <ArrowLeft className="h-4 w-4 mr-2" />
                 Dashboard
               </Button>
 
-              <h1 className="text-2xl font-bold text-white">Template Library</h1>
+              <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-purple to-primary-pink">Template Library</h1>
             </div>
           </div>
 
@@ -89,6 +90,7 @@ const Templates = () => {
                   variant={selectedCategory === category ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setSelectedCategory(category)}
+                  className={selectedCategory === category ? 'bg-primary-purple hover:opacity-90' : 'hover:bg-bg-hover border-slate-700'}
                   data-testid={`category-${category}`}
                 >
                   {category === 'all' ? 'All' : category}
@@ -103,10 +105,10 @@ const Templates = () => {
       <main className="container mx-auto px-4 py-8">
         {loading ? (
           <div className="flex items-center justify-center py-12" data-testid="templates-loading">
-            <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary-green" />
           </div>
         ) : templates.length === 0 ? (
-          <div className="text-center py-12 text-slate-400" data-testid="templates-empty">
+          <div className="text-center py-12 text-text-secondary" data-testid="templates-empty">
             No templates found in this category
           </div>
         ) : (
@@ -114,7 +116,7 @@ const Templates = () => {
             {templates.map((template) => (
               <Card
                 key={template.id}
-                className="bg-slate-900/50 border-slate-800 overflow-hidden group hover:border-green-500 transition-colors"
+                className="bg-bg-card border-slate-800 rounded-xl overflow-hidden group hover:border-primary-purple transition-colors"
                 data-testid={`template-card-${template.id}`}
               >
                 <div
@@ -127,7 +129,7 @@ const Templates = () => {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                   />
                   {template.is_community && (
-                    <Badge className="absolute top-2 right-2 bg-purple-500">
+                    <Badge className="absolute top-2 right-2 bg-primary-purple">
                       Community
                     </Badge>
                   )}
@@ -135,7 +137,7 @@ const Templates = () => {
 
                 <CardContent className="p-4">
                   <h3
-                    className="font-semibold text-white mb-2 line-clamp-2 cursor-pointer hover:text-green-400"
+                    className="font-semibold text-text-primary mb-2 line-clamp-2 cursor-pointer hover:text-primary-green"
                     onClick={() => handleUseTemplate(template.id)}
                     data-testid={`template-title-${template.id}`}
                   >
@@ -143,7 +145,7 @@ const Templates = () => {
                   </h3>
 
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2 text-sm text-slate-400">
+                    <div className="flex items-center space-x-2 text-sm text-text-secondary">
                       <ThumbsUp className="h-4 w-4" />
                       <span data-testid={`template-votes-${template.id}`}>{template.votes}</span>
                     </div>
@@ -151,6 +153,7 @@ const Templates = () => {
                     <Button
                       size="sm"
                       onClick={() => handleUseTemplate(template.id)}
+                      className="bg-primary-green text-gray-900 hover:opacity-90"
                       data-testid={`template-use-${template.id}`}
                     >
                       Use Template

@@ -31,6 +31,8 @@ from database import (
     create_team, get_team_by_id, get_user_teams, update_team, delete_team,
     add_team_member, get_team_members, get_team_member, update_team_member_role,
     remove_team_member, accept_team_invite,
+    create_analytics_record, get_meme_analytics, get_user_analytics_summary,
+    get_team_analytics_summary,
     close_db_connection
 )
 from ai_services import ai_service

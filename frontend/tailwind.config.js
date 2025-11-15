@@ -13,6 +13,25 @@ module.exports = {
   			sm: 'calc(var(--radius) - 4px)'
   		},
   		colors: {
+  			// PRD Design System Colors
+  			'primary-green': 'var(--primary-green)',
+  			'primary-purple': 'var(--primary-purple)',
+  			'primary-blue': 'var(--primary-blue)',
+  			'primary-yellow': 'var(--primary-yellow)',
+  			'primary-pink': 'var(--primary-pink)',
+  			'bg-dark': 'var(--bg-dark)',
+  			'bg-darker': 'var(--bg-darker)',
+  			'bg-card': 'var(--bg-card)',
+  			'bg-hover': 'var(--bg-hover)',
+  			'text-primary': 'var(--text-primary)',
+  			'text-secondary': 'var(--text-secondary)',
+  			'text-muted': 'var(--text-muted)',
+  			'accent-fire': 'var(--accent-fire)',
+  			'accent-success': 'var(--accent-success)',
+  			'accent-warning': 'var(--accent-warning)',
+  			'accent-error': 'var(--accent-error)',
+  			
+  			// shadcn/ui colors (keep for compatibility)
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {

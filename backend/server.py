@@ -15,6 +15,7 @@ from models import (
     NotificationResponse,
     CommentCreate, CommentResponse,
     ImageGenerateRequest, CaptionSuggestRequest, ViralPredictRequest,
+    BackgroundRemoveRequest, FaceSwapRequest,
     Provider, Platform, PlanType
 )
 from auth import get_password_hash, authenticate_user, create_access_token, get_current_user
